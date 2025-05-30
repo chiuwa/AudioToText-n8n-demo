@@ -12,7 +12,8 @@
 ![image](https://github.com/user-attachments/assets/4dfc12fb-4f2f-4433-90b6-61adddc814b9)
 
 Demo : https://sound-to-text-demo.pages.dev/
-提供n8n json : n8n_sample_soundToText.json
+
+提供n8n json :  https://github.com/chiuwa/AudioToText-n8n-demo/blob/main/n8n_sample_soundToText.json
 ## ✨ 專案特色
 
 這是一個完整的**漸進式網頁應用程式（PWA）**，結合了現代 Web 技術與人工智能，為用戶提供便捷的音訊影片轉文字服務。
