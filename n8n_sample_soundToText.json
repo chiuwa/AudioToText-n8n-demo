@@ -1,0 +1,98 @@
+{
+  "name": "soundToText",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models{{model_name}}:generateContent?key={{api_key}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"你是一個語音轉文字的助手，能夠從提供的音訊中辨識出說話內容，並附上每一句的起始與結束時間。音訊資料是 base64 編碼格式。請以逐句（或逐段）方式提供時間戳與對應的文字。注意用戶語言,同對應的文字輸出.每段結果應包含：\\n\\n- 開始時間（start time）\\n- 結束時間（end time）\\n- 語音內容（text）\\n\\n請以 JSON 格式輸出，例如：\\n[\\n  {\\n    \\\"start\\\": \\\"00:00:01.500\\\",\\n    \\\"end\\\": \\\"00:00:04.000\\\",\\n    \\\"text\\\": \\\"大家好，歡迎收聽今天的節目。\\\"\\n  },\\n  {\\n    \\\"start\\\": \\\"00:00:04.100\\\",\\n    \\\"end\\\": \\\"00:00:06.800\\\",\\n    \\\"text\\\": \\\"我們要討論的是人工智慧的應用。\\\"\\n  }\\n]\"\n        },\n        {\n          \"inline_data\": {\n            \"mime_type\": \"{{ $json.body.mime_type }}\",\n            \"data\": \"{{ $json.body.data }}\"\n          }\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.1\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        220
+      ],
+      "id": "55176bff-f5ea-4c56-9c88-4cfc8847fcd2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "51e20d0b-afeb-41d8-aa85-b4410ce23ebf",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        60,
+        220
+      ],
+      "id": "3d3b6f86-05e4-43ca-b1cb-d7823902e429",
+      "name": "Webhook",
+      "webhookId": "51e20d0b-afeb-41d8-aa85-b4410ce23ebf"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        220
+      ],
+      "id": "d6f362d5-4cc8-4434-b0aa-90ed76b149d2",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d72f353d-dea9-40e0-9bfc-e1f713693d66",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f56fd9a4f55275ac487d3d81eecb5c398d446e229c079b877d0b2205cd4e2adc"
+  },
+  "id": "JZfcwSL2Y2BWfYbb",
+  "tags": []
+}
