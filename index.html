@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N8N 音訊理解 Demo</title>
+    
+    <!-- PWA 支援 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#294459">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="音訊AI">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 3px dashed #294459;
+            border-radius: 15px;
+            padding: 50px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(135deg, #e5afbc 0%, #f8f4f6 100%);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .upload-area:hover {
+            border-color: #8c2c44;
+            background: linear-gradient(135deg, #f8f4f6 0%, #e5afbc 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(140,44,68,0.3);
+        }
+        .upload-area.dragover {
+            border-color: #8c2c44;
+            background: linear-gradient(135deg, #e5afbc 0%, #f0d4d8 100%);
+            transform: scale(1.02);
+        }
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #294459, #8c2c44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #294459;
+        }
+        .upload-hint {
+            color: #8c2c44;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+        .share-btn {
+            margin-top: 15px;
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+            color: white;
+        }
+        .result-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .error-message {
+            display: none;
+        }
+        .transcript-content {
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+        .transcript-segment {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-left: 3px solid #294459;
+            background-color: #e5afbc;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.2s ease;
+        }
+        .transcript-segment:hover {
+            background-color: #f0d4d8;
+            transform: translateX(5px);
+        }
+        .timestamp {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #8c2c44;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .transcript-text {
+            font-size: 1em;
+            color: #294459;
+            margin: 0;
+        }
+        .timestamps-hidden .timestamp {
+            display: none;
+        }
+        .segment-number {
+            background: #294459;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .file-type-icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+        .audio-icon { color: #17a2b8; }
+        .video-icon { color: #dc3545; }
+        
+        .media-preview {
+            margin-top: 10px;
+        }
+        .media-preview audio {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .media-preview video {
+            width: 100%;
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .preview-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .audio-info-display {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #e5afbc 0%, #f8f4f6 100%);
+            border-radius: 6px;
+            border-left: 3px solid #294459;
+        }
+        .audio-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+        }
+        .audio-info-item:last-child {
+            margin-bottom: 0;
+        }
+        .audio-info-item i {
+            margin-right: 6px;
+            width: 16px;
+        }
+        .info-label {
+            font-weight: 600;
+            margin-right: 4px;
+            color: #294459;
+        }
+        
+        /* 錄音功能樣式 */
+        .recording-section {
+            border-top: 2px solid #e5afbc;
+            padding-top: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .recording-header h6 {
+            color: #294459;
+            font-weight: bold;
+            margin: 0;
+        }
+        .recording-controls {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .recording-btn {
+            margin: 5px;
+            min-width: 140px;
+            font-weight: bold;
+            padding: 10px 20px;
+        }
+        .recording-btn:disabled {
+            opacity: 0.6;
+        }
+        .recording-status {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e5afbc 0%, #f0d4d8 100%);
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #294459;
+        }
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .pulse-dot {
+            width: 14px;
+            height: 14px;
+            background: #dc3545;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .recording-text {
+            color: #294459;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .recording-time {
+            color: #8c2c44;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2em;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h1 class="text-center mb-4">
+                    <i class="fas fa-microphone-alt"></i> 音訊/影片理解 AI
+                </h1>
+                
+                <!-- 檔案上傳區域 -->
+                <div class="card mb-4 shadow">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #294459 0%, #8c2c44 100%);">
+                        <h5 class="mb-0"><i class="fas fa-cloud-upload-alt"></i> 上傳媒體檔案</h5>
+                        <button class="btn btn-outline-light btn-sm" id="shareAppBtn" style="display: none;">
+                            <i class="fas fa-share-alt"></i> 分享應用
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">拖拽檔案到此處或點擊選擇</div>
+                            <div class="upload-hint">
+                                📱 支援音訊：MP3, WAV, M4A, FLAC, OGG, AAC<br>
+                                🎬 支援影片：MP4, MOV, AVI, WEBM, 3GP<br>
+                                📏 最大檔案：20MB<br>
+                                <small class="text-muted">💡 iPhone 用戶：安裝 PWA 後可從 WhatsApp 直接分享</small>
+                            </div>
+                            <input type="file" id="audioFile" accept="audio/*,video/*" style="display: none;">
+                        </div>
+                        
+                        <!-- 錄音功能區域 -->
+                        <div class="recording-section mt-4">
+                            <div class="recording-header">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-microphone text-primary"></i> 
+                                    直接錄音
+                                </h6>
+                            </div>
+                            <div class="recording-controls">
+                                <button id="recordBtn" class="btn btn-outline-primary recording-btn" disabled>
+                                    <i class="fas fa-microphone"></i> 開始錄音
+                                </button>
+                                <button id="stopRecordBtn" class="btn btn-outline-danger recording-btn" style="display: none;">
+                                    <i class="fas fa-stop"></i> 停止錄音
+                                </button>
+                            </div>
+                            <div id="recordingStatus" class="recording-status" style="display: none;">
+                                <div class="recording-indicator">
+                                    <div class="pulse-dot"></div>
+                                    <span class="recording-text">錄音中...</span>
+                                    <span id="recordingTime" class="recording-time">00:00</span>
+                                </div>
+                            </div>
+                            <div id="microphoneWarning" class="alert alert-warning mt-3" style="display: none;">
+                                <small><i class="fas fa-exclamation-triangle"></i> 瀏覽器不支援錄音功能或未授權麥克風權限</small>
+                            </div>
+                        </div>
+                        
+                        <!-- 檔案資訊顯示 -->
+                        <div id="fileInfo" style="display: none;" class="mt-3">
+                            <div class="alert alert-info">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <strong>檔案名稱：</strong> <span id="fileName"></span><br>
+                                        <strong>檔案大小：</strong> <span id="fileSize"></span><br>
+                                        <strong>檔案類型：</strong> <span id="fileType"></span>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div id="mediaPreview" class="media-preview">
+                                            <!-- 音訊/影片播放器將在這裡動態生成 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 處理按鈕 -->
+                        <div class="text-center mt-3">
+                            <button id="processBtn" class="btn btn-lg" disabled style="background: linear-gradient(135deg, #294459 0%, #8c2c44 100%); color: white; border: none;">
+                                <i class="fas fa-cogs"></i> 開始處理音訊
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 載入狀態 -->
+                <div class="loading-spinner text-center mb-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">處理中...</span>
+                    </div>
+                    <p class="mt-2">正在處理音訊檔案，請稍候...</p>
+                </div>
+                
+                <!-- 錯誤訊息 -->
+                <div class="alert alert-danger error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorText"></span>
+                </div>
+                
+                <!-- 結果顯示 -->
+                <div id="resultSection" style="display: none;">
+                    <!-- 逐字稿顯示區域 -->
+                    <div id="transcriptSection" style="display: none;" class="mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-align-left"></i> 音訊逐字稿</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary me-2" id="toggleTimestamps">
+                                        <i class="fas fa-clock"></i> 切換時間戳
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" id="exportTranscript">
+                                        <i class="fas fa-download"></i> 匯出逐字稿
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="transcriptContent" class="transcript-content">
+                                    <!-- 逐字稿內容將在這裡動態生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 原始表格顯示區域 -->
+                    <div id="tableSection">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-table"></i> 詳細資料</h5>
+                                <button class="btn btn-sm btn-outline-primary" id="exportBtn">
+                                    <i class="fas fa-download"></i> 匯出結果
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="result-table">
+                                    <table class="table table-striped table-hover" id="resultTable">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>欄位</th>
+                                                <th>值</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/fileHandler.js"></script>
+    <script src="js/audioRecorder.js"></script>
+    <script src="js/audioProcessor.js"></script>
+    <script src="js/uiController.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Web Share API 支援 -->
+    <script>
+        // 檢查 Web Share API 支援
+        if (navigator.share) {
+            console.log('Web Share API supported');
+            
+            // 添加分享按鈕功能
+            document.addEventListener('DOMContentLoaded', () => {
+                const shareBtn = document.getElementById('shareAppBtn');
+                if (shareBtn) {
+                    shareBtn.style.display = 'inline-block';
+                    shareBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        navigator.share({
+                            title: '音訊影片理解 AI',
+                            text: '智能音訊影片轉文字與分析工具 - 支援從 WhatsApp 直接分享音訊/影片檔案',
+                            url: window.location.href
+                        }).catch(err => {
+                            console.log('分享取消或失敗:', err);
+                        });
+                    });
+                }
+            });
+        } else {
+            console.log('Web Share API not supported');
+        }
+    </script>
+</body>
+</html> 
