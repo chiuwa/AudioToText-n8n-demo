@@ -5,6 +5,12 @@
 [![PWA](https://img.shields.io/badge/PWA-ready-brightgreen.svg)](https://developers.google.com/web/progressive-web-apps/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![SOLID](https://img.shields.io/badge/Architecture-SOLID-blue.svg)](https://en.wikipedia.org/wiki/SOLID)
+![image](https://github.com/user-attachments/assets/0934a251-ccb8-4f9e-a87d-f513f8aa6603)
+![image](https://github.com/user-attachments/assets/e610eced-906a-4f7f-aebe-cbd2b18024a0)
+![image](https://github.com/user-attachments/assets/b026331d-8bb0-4897-870e-1b7b72e78de3)
+![image](https://github.com/user-attachments/assets/2ace9b1f-ec79-42d8-8367-e3f9bd4f9823)
+![image](https://github.com/user-attachments/assets/4dfc12fb-4f2f-4433-90b6-61adddc814b9)
+
 
 ## ✨ 專案特色
 
