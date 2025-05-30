@@ -1,6 +1,6 @@
-# 🎙️ Audio Video AI Transcription PWA
+# 🎙️ Audio Video AI Transcription 
 
-> 一個基於 PWA 技術的智能音訊影片轉文字應用，支援網頁錄音、檔案上傳、WhatsApp 分享等多種方式，透過 AI 進行音訊分析並生成逐字稿。
+> 一個基於N8N api的智能音訊影片轉文字應用，支援網頁錄音、檔案上傳、WhatsApp 分享等多種方式，透過 AI 進行音訊分析並生成逐字稿。
 
 [![PWA](https://img.shields.io/badge/PWA-ready-brightgreen.svg)](https://developers.google.com/web/progressive-web-apps/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
@@ -11,7 +11,7 @@
 ![image](https://github.com/user-attachments/assets/2ace9b1f-ec79-42d8-8367-e3f9bd4f9823)
 ![image](https://github.com/user-attachments/assets/4dfc12fb-4f2f-4433-90b6-61adddc814b9)
 
-
+Demo : https://sound-to-text-demo.pages.dev/
 ## ✨ 專案特色
 
 這是一個完整的**漸進式網頁應用程式（PWA）**，結合了現代 Web 技術與人工智能，為用戶提供便捷的音訊影片轉文字服務。
